@@ -1,95 +1,49 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import { useEffect, useState } from "react";
+import { getContract } from "../../warp/configureWarpClient";
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    readState();
+  }, []);
+  async function readState() {
+    const contract = await getContract();
+    try {
+      const data = await contract.readState();
+      console.log("data ", data);
+      const posts = Object.values(data.cachedValue.state.posts);
+      setPosts(posts);
+      console.log("posts: ", posts);
+    } catch (err) {
+      console.log(err);
+    }
+  }
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    <div style={containerStyle}>
+      <h1 style={headingStyle}>Permablog</h1>
+      {posts.map((post, index) => {
+        <div key={index} style={postStyle}>
+          <p style={titleStyle}>{post.title}</p>
+          <ReactMarkdown>{post.content}</ReactMarkdown>
+        </div>;
+      })}
+    </div>
+  );
 }
+const containerStyle = {
+  width: "900px",
+  margin: "0 auto",
+};
+const headingStyle = {
+  fontSize: "64px",
+};
+const postStyle = {
+  padding: "15px 0px 0px",
+  borderBottom: "1px solid rgba(255,255,255, .2)",
+};
+const titleStyle = {
+  fontSize: "34px",
+  marginBottom: "0px",
+};
